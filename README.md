@@ -9,7 +9,7 @@ This project implements a full deep learning experiment workflow for IIoT cybers
 ## What I Built
 - `deep_learning.ipynb`: end-to-end deep learning experiment notebook
 - `requirements.txt`: project-scoped dependencies for reproducible execution
-- `Deep_Learning_Systems_Analysis_Report_draft.pdf`: report aligned to notebook outputs
+- `Deep_Learning_Systems_Analysis_Report.pdf`: report aligned to notebook outputs
 
 ## Dataset
 - Name: RT-IoT2022
