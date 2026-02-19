@@ -1,0 +1,19 @@
+{
+  "artifact_prefix": "rtiot2022_binary_rs42_n120000",
+  "random_state": 42,
+  "max_rows": 120000,
+  "split_rows": {
+    "train": 84000,
+    "val": 18000,
+    "test": 18000
+  },
+  "num_features": 81,
+  "cat_features": 2,
+  "numeric_columns_file": "data/processed/rtiot2022_binary_rs42_n120000_numeric_columns.csv",
+  "categorical_columns_file": "data/processed/rtiot2022_binary_rs42_n120000_categorical_columns.csv",
+  "arrays_file": "data/processed/rtiot2022_binary_rs42_n120000_split_arrays.npz",
+  "categorical_cardinalities": [
+    4,
+    11
+  ]
+}
