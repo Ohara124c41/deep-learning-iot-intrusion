@@ -1,23 +1,47 @@
 # Deep Learning Systems (P4)
 
 ## Project Description
-This project implements a deep learning experiment workflow for IIoT cybersecurity detection using the UCI RT-IoT2022 dataset. The notebook loads and preprocesses network telemetry, trains a Transformer-based binary classifier (`attack` vs `benign`) in PyTorch, and runs a controlled comparison where exactly one major factor changes. The workflow emphasizes reproducibility, experimental rigor, and security-relevant interpretation rather than only maximizing accuracy.
+This project implements a full deep learning experiment workflow for IIoT cybersecurity detection using the UCI RT-IoT2022 dataset. The notebook loads and preprocesses real network telemetry, trains Transformer-based binary classifiers (`attack` vs `benign`) in PyTorch, runs a controlled baseline-vs-experiment comparison, then extends to ablations and ensembles with a guardrail-aware score verifier. The goal is a reproducible, operations-oriented deep learning component for a broader DevSecAIOps local-cloud architecture.
 
 ## Project Repository
 - https://github.com/Ohara124c41/deep-learning-iot-intrusion
 
 ## What I Built
 - `deep_learning.ipynb`: end-to-end deep learning experiment notebook
-- `requirements.txt`: Python dependencies for reproducible execution
-- `Deep_Learning_Systems_Analysis_Report_draft.md`: report draft template (export to PDF for submission)
+- `requirements.txt`: project-scoped dependencies for reproducible execution
+- `Deep_Learning_Systems_Analysis_Report_draft.pdf`: report aligned to notebook outputs
 
 ## Dataset
 - Name: RT-IoT2022
 - Source (UCI): https://archive.ics.uci.edu/dataset/942/rt-iot2022
-- In-notebook access: `ucimlrepo` fetch (with local cache fallback to `data/raw/rtiot2022_raw.csv`)
+- Access method: `ucimlrepo` fetch with local cache fallback at `data/raw/rtiot2022_raw.csv`
+
+## Key Run Snapshot
+- Raw ingestion shape: `123,117 x 84`
+- Modeling frame: `120,000 x 87`
+- Binary target counts: benign `12,171`, attack `107,829` (attack rate `0.8986`)
+- Split sizes: train `84,000`, validation `18,000`, test `18,000`
+- Final selected model (score verifier): `ensemble_weighted_top3_valf1`
+- Final test metrics: `F1=0.9968`, `PR-AUC=0.99996`, `RMSE(prob)=0.0624`
+
+## Controlled Experiment
+- Baseline: Transformer with dropout `0.10`
+- Experimental: identical setup except dropout `0.30`
+- Test comparison (threshold `0.5`):
+  - Baseline: `F1=0.9956`, `Recall=0.9923`, `PR-AUC=0.99993`, `RMSE(prob)=0.0878`
+  - Experiment: `F1=0.9966`, `Recall=0.9949`, `PR-AUC=0.99986`, `RMSE(prob)=0.0743`
+
+## Extended Analyses
+- Threshold sweep and test-time transfer from validation-optimal threshold
+- Error-case analysis by original attack labels
+- Single-change ablations (`d_model`, depth, learning rate, optimizer, class weighting)
+- Deep ensembles (mean and weighted top-3)
+- Multi-metric score verifier with recall/FPR guardrails
+- AIF360 subgroup audit (SPD/DI/EOD/AOD)
+- NIST-aligned deterministic readiness checks
 
 ## How To Run
-1. Create and activate a virtual environment (WSL/Ubuntu example):
+1. Create and activate a virtual environment:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -34,24 +58,15 @@ jupyter notebook
 `deep_learning.ipynb`
 
 ## Reproducibility Notes
-- The notebook includes package bootstrap logic for missing dependencies.
-- Data is cached locally under `data/raw/` after first successful download.
-- Deterministic controls include fixed random seeds and fixed split strategy.
-- Before submission, refresh environment lock file:
+- The notebook includes bootstrap checks for required/optional packages.
+- Seeds, split strategy, and key hyperparameters are fixed in configuration cells.
+- Data is cached locally after first fetch for repeat runs.
+- Preprocessed split artifacts are exported to `data/processed/` (`.npz` arrays + metadata manifest) for deterministic reuse.
+- Refresh lock file from your project venv before submission:
 ```bash
 pip freeze > requirements.txt
 ```
 
-## Controlled Experiment Definition
-- Baseline: Transformer model with dropout `0.10`.
-- Experimental model: identical architecture and training setup, except dropout `0.30`.
-- This satisfies the requirement of changing exactly one major aspect.
-
-## Extended Analyses 
-- Validation-threshold sweep and test-time threshold transfer.
-- Error-case inspection (false negatives/false positives by original class labels).
-- Multi-ablation suite (architecture, optimizer, learning rate, class-weight settings).
-- Deep ensembles (mean and weighted top-k probability ensembles).
-- Score verifier with guardrail-aware multi-metric model selection.
-- AIF360 subgroup-risk audit and NIST-aligned readiness checks.
-- V&V checklist cell for explicit requirement traceability.
+## Bias and Risk Notes
+- AIF360 selected subgroup `is_proto_tcp` and found measurable disparity (`SPD=-0.305`, `DI=0.671`, `EOD=-0.043`), indicating error-rate behavior differs by protocol subgroup.
+- Error concentration is asymmetric: baseline false negatives were mostly `ARP_poisioning`, while false positives were mostly `Thing_Speak`, so production use should include class-level monitoring and human review gates.
