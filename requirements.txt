@@ -1,0 +1,10 @@
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+torch
+ucimlrepo
+aif360==0.6.1
+jupyterlab
+ipykernel
